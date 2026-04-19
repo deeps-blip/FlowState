@@ -1,0 +1,6 @@
+{
+  "name": "HR Workflow Designer",
+  "description": "A high-end SaaS workflow designer for HR processes with drag-and-drop, custom nodes, simulation, and export capabilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["React Flow", "Zustand", "Workflow Automation"]
+}
