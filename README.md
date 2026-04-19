@@ -1,13 +1,3 @@
-<div align="center">
-
-<br/>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-  <img width="100%" alt="FlowState Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</picture>
-
-<br/><br/>
 
 # ⚡ FlowState — Workflow Automation Designer
 
