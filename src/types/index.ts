@@ -54,6 +54,34 @@ export interface WorkflowDefinition {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TemplateMetadata {
+  template: WorkflowDefinition;
+  category: string;
+  description: string;
+  color: string;
+  icon: string;
+  nodeCount: number;
+  edgeCount: number;
+}
+
+export interface IntegrationRecord {
+  id: string;
+  name: string;
+  enabled: boolean;
+  lastTriggered?: string;
+}
+
+export interface ExecLogRecord {
+  runId: string;
+  workflowId: string;
+  workflowName: string;
+  startedAt: string;
+  duration: number;
+  steps: SimulationLogEntry[];
+  success: boolean;
 }
 
 // ─── Simulation ────────────────────────────────────────────────────────────────

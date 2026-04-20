@@ -61,7 +61,7 @@ export const FlowNodeCard: React.FC<NodeCardProps> = ({ data, selected }) => {
       {!isStart && (
         <Handle
           type="target"
-          position={Position.Left}
+          position={Position.Top}
           className="!w-3 !h-3 !bg-slate-300 !border-white !border-2"
         />
       )}
@@ -113,7 +113,7 @@ export const FlowNodeCard: React.FC<NodeCardProps> = ({ data, selected }) => {
       {!isEnd && (
         <Handle
           type="source"
-          position={Position.Right}
+          position={Position.Bottom}
           className="!w-3 !h-3 !bg-slate-300 !border-white !border-2"
         />
       )}
@@ -124,7 +124,7 @@ export const FlowNodeCard: React.FC<NodeCardProps> = ({ data, selected }) => {
           type="source"
           position={Position.Bottom}
           id="escalation"
-          className="!w-3 !h-3 !bg-rose-400 !border-white !border-2"
+          className="!translate-x-4 !w-3 !h-3 !bg-rose-400 !border-white !border-2"
         />
       )}
     </motion.div>

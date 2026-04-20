@@ -21,7 +21,10 @@ import ValidationPanel from './ValidationPanel';
 import { NODE_REGISTRY, NODE_ICONS } from '../nodes/NodeRegistry';
 import { validateWorkflow, serializeWorkflow, topologicalSort } from '../engine/SimulationEngine';
 import { simulateWorkflow } from '../../../services/api';
+import { appendExecLog } from '../../../db';
 import { DynamicForm } from '../forms/DynamicForm';
+import { useSchedulerStore } from '../../scheduler/SchedulerStore';
+import { SchedulerPanel } from '../../scheduler/SchedulerPanel';
 import { cn } from '../../../utils/cn';
 import type { NodeKind, WorkflowNode } from '../../../types';
 
@@ -41,6 +44,10 @@ import {
   BarChart3,
   Box,
   FlaskConical,
+  LayoutGrid,
+  Webhook,
+  Calendar,
+  Workflow,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -53,6 +60,7 @@ const edgeTypes = { labeled: LabeledEdge };
 const TopBar: React.FC = () => {
   const { nodes, edges, undo, redo, startSimulation, importWorkflow, setNodes, historyIndex, history } =
     useWorkflowStore();
+  const { openPanel: openScheduler } = useSchedulerStore();
   const { fitView } = useReactFlow();
 
   const canUndo = historyIndex > 0;
@@ -84,7 +92,7 @@ const TopBar: React.FC = () => {
 
   const handleAutoLayout = () => {
     const g = new dagre.graphlib.Graph();
-    g.setGraph({ rankdir: 'LR', nodesep: 80, ranksep: 120 });
+    g.setGraph({ rankdir: 'TB', nodesep: 150, ranksep: 100 });
     g.setDefaultEdgeLabel(() => ({}));
     nodes.forEach((n) => g.setNode(n.id, { width: 220, height: 80 }));
     edges.forEach((e) => g.setEdge(e.source, e.target));
@@ -123,6 +131,24 @@ const TopBar: React.FC = () => {
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
         >
           <BarChart3 size={13} /> Dashboard
+        </Link>
+        <Link
+          to="/repository"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+        >
+          <LayoutGrid size={13} /> Repository
+        </Link>
+        <Link
+          to="/templates"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+        >
+          <Workflow size={13} /> Templates
+        </Link>
+        <Link
+          to="/integrations"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+        >
+          <Webhook size={13} /> Integrations
         </Link>
         <Link
           to="/sandbox"
@@ -172,6 +198,13 @@ const TopBar: React.FC = () => {
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors"
         >
           <Download size={13} /> Export
+        </button>
+
+        <button
+          onClick={openScheduler}
+          className="flex items-center gap-1.5 ml-1 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors"
+        >
+          <Calendar size={13} /> Scheduler
         </button>
 
         <button
@@ -577,7 +610,20 @@ const CanvasInner: React.FC = () => {
         updateNodeData(node.id, { status });
       }
 
-      if (active) setSimulationData(logs, null);
+      if (active) {
+        setSimulationData(logs, null);
+        
+        // Log to persistent DB for analytics
+        appendExecLog({
+          runId: `run-${Date.now()}`,
+          workflowId: 'canvas-run',
+          workflowName: 'Canvas Active Flow',
+          startedAt: new Date().toISOString(),
+          duration: logs.reduce((a, l) => a + l.duration, 0),
+          steps: logs,
+          success: !logs.some(l => l.status === 'error'),
+        });
+      }
     };
 
     run();
@@ -612,7 +658,7 @@ const CanvasInner: React.FC = () => {
         snapToGrid
         snapGrid={[16, 16]}
         fitView
-        minZoom={0.2}
+        minZoom={0.1}
         maxZoom={2.5}
         proOptions={{ hideAttribution: true }}
         defaultEdgeOptions={{
@@ -669,10 +715,15 @@ const WorkflowCanvas: React.FC = () => {
     <ReactFlowProvider>
       <div className="flex flex-col h-screen bg-slate-950 font-sans antialiased">
         <TopBar />
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-1 min-h-0 relative">
           <NodePalette />
           <CanvasInner />
           <ConfigPanel />
+          <div className="absolute right-0 top-0 bottom-0 pointer-events-none z-[100]">
+            <div className="pointer-events-auto h-full">
+              <SchedulerPanel />
+            </div>
+          </div>
         </div>
         <StatusBar />
       </div>

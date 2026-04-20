@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { addEdge, applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import type { Connection, NodeChange, EdgeChange } from 'reactflow';
 import { MarkerType } from 'reactflow';
-import type { WorkflowNode, WorkflowEdge, SimulationLogEntry } from '../types';
+import type { WorkflowNode, WorkflowEdge, SimulationLogEntry, WorkflowDefinition } from '../types';
+import { saveFlow } from '../db';
 
 // ─── State Shape ───────────────────────────────────────────────────────────────
 
@@ -62,6 +63,7 @@ interface WorkflowStore {
 
   // Actions: import / export
   importWorkflow: (json: string) => void;
+  loadWorkflow: (workflow: WorkflowDefinition) => void;
 }
 
 // ─── Initial Nodes ─────────────────────────────────────────────────────────────
@@ -195,6 +197,15 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       history: [...trimmed, { nodes: [...nodes], edges: [...edges] }],
       historyIndex: historyIndex + 1,
     });
+
+    // Persist to DB if nodes exist
+    if (nodes.length > 0) {
+      saveFlow({
+        name: 'Auto-saved Flow',
+        nodes,
+        edges,
+      });
+    }
   },
 
   undo: () => {
@@ -243,5 +254,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     } catch {
       alert('Invalid Workflow JSON — please check the file and try again.');
     }
+  },
+
+  loadWorkflow: (flow) => {
+    set({ nodes: flow.nodes, edges: flow.edges, selectedNodeId: null });
+    get().saveHistory();
   },
 }));

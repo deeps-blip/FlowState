@@ -7,40 +7,12 @@ import {
 import { Link } from 'react-router-dom';
 import { Zap, BarChart3, Box, FlaskConical, TrendingUp, Activity, Clock, AlertTriangle } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useLiveStats } from '../db/analytics';
 import type { WorkflowStats } from '../types';
 
 // ─── Mock Analytics Data ───────────────────────────────────────────────────────
 
-const stats: WorkflowStats = {
-  totalWorkflows: 47,
-  successRate: 91.4,
-  avgExecutionTime: 3.8,
-  nodeUsage: [
-    { type: 'start',      count: 47 },
-    { type: 'task',       count: 182 },
-    { type: 'approval',   count: 94 },
-    { type: 'automation', count: 215 },
-    { type: 'end',        count: 47 },
-  ],
-  errorFrequency: [
-    { date: 'Mon', errors: 2 },
-    { date: 'Tue', errors: 5 },
-    { date: 'Wed', errors: 1 },
-    { date: 'Thu', errors: 4 },
-    { date: 'Fri', errors: 3 },
-    { date: 'Sat', errors: 0 },
-    { date: 'Sun', errors: 1 },
-  ],
-  executionHistory: [
-    { date: 'Apr 13', executions: 12, successes: 11 },
-    { date: 'Apr 14', executions: 18, successes: 16 },
-    { date: 'Apr 15', executions: 9,  successes: 9  },
-    { date: 'Apr 16', executions: 24, successes: 22 },
-    { date: 'Apr 17', executions: 21, successes: 19 },
-    { date: 'Apr 18', executions: 30, successes: 28 },
-    { date: 'Apr 19', executions: 15, successes: 14 },
-  ],
-};
+// ─── Stat Card Accent Colors ──────────────────────────────────────────────────
 
 const NODE_COLORS: Record<string, string> = {
   start:      '#10b981',
@@ -74,6 +46,40 @@ const StatCard: React.FC<{
 // ─── Dashboard ─────────────────────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
+  const stats = useLiveStats();
+
+  if (!stats.hasData) {
+    return (
+      <div className="min-h-screen bg-slate-950 font-sans antialiased text-white flex flex-col">
+        <header className="h-14 bg-slate-900 border-b border-slate-700/60 flex items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <Zap size={16} className="text-white" />
+            </div>
+            <span className="text-lg font-black text-white">FlowState</span>
+          </div>
+          <nav className="flex items-center gap-1">
+            <Link to="/"          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"><Box size={13} /> Canvas</Link>
+            <Link to="/dashboard" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-300 bg-indigo-500/20 rounded-lg border border-indigo-500/30"><BarChart3 size={13} /> Dashboard</Link>
+            <Link to="/sandbox"   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"><FlaskConical size={13} /> Sandbox</Link>
+          </nav>
+        </header>
+        <main className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
+          <div className="w-20 h-20 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-700 mb-2">
+            <BarChart3 size={40} />
+          </div>
+          <h1 className="text-2xl font-black text-white">No Analytics Yet</h1>
+          <p className="text-slate-500 text-center max-w-sm">
+            Execute some workflows or create them in the canvas to start seeing live analytics and performance insights.
+          </p>
+          <Link to="/" className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+            Go to Canvas
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 font-sans antialiased text-white">
       {/* Nav */}
