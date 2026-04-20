@@ -28,6 +28,12 @@ interface WorkflowStore {
   simulationLogs: SimulationLogEntry[];
   simulationActiveNodeId: string | null;
 
+  // Validation
+  validationErrors: string[];
+  validationWarnings: string[];
+  setValidationResult: (errors: string[], warnings: string[]) => void;
+  clearValidation: () => void;
+
   // Actions: canvas
   setNodes: (nodes: WorkflowNode[] | ((nds: WorkflowNode[]) => WorkflowNode[])) => void;
   setEdges: (edges: WorkflowEdge[] | ((eds: WorkflowEdge[]) => WorkflowEdge[])) => void;
@@ -40,6 +46,9 @@ interface WorkflowStore {
   deleteNode: (id: string) => void;
   updateNodeData: (id: string, data: Partial<WorkflowNode['data']>) => void;
   selectNode: (id: string | null) => void;
+
+  // Actions: edges
+  updateEdgeLabel: (id: string, label: string) => void;
 
   // Actions: history
   saveHistory: () => void;
@@ -83,6 +92,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   isSimulating: false,
   simulationLogs: [],
   simulationActiveNodeId: null,
+  validationErrors: [],
+  validationWarnings: [],
+
+  // ── Validation ──────────────────────────────────────────────────────────────
+
+  setValidationResult: (errors, warnings) => set({ validationErrors: errors, validationWarnings: warnings }),
+  clearValidation: () => set({ validationErrors: [], validationWarnings: [] }),
 
   // ── Canvas ──────────────────────────────────────────────────────────────────
 
@@ -122,8 +138,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const newEdges = addEdge(
       {
         ...connection,
+        type: 'labeled',
         animated: true,
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1' },
+        data: { label: '' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1', width: 18, height: 18 },
         style: { stroke: '#6366f1', strokeWidth: 2 },
       },
       edges
@@ -157,6 +175,16 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   selectNode: (id) => set({ selectedNodeId: id }),
+
+  // ── Edges ───────────────────────────────────────────────────────────────────
+
+  updateEdgeLabel: (id, label) => {
+    set((s) => ({
+      edges: s.edges.map((e) =>
+        e.id === id ? { ...e, data: { ...(e.data ?? {}), label }, label } : e
+      ),
+    }));
+  },
 
   // ── History ──────────────────────────────────────────────────────────────────
 

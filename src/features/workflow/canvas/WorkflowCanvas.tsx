@@ -8,6 +8,7 @@ import ReactFlow, {
   Panel,
   ReactFlowProvider,
   useReactFlow,
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -15,6 +16,8 @@ import dagre from 'dagre';
 
 import { useWorkflowStore } from '../../../store/workflowStore';
 import { nodeTypes } from '../nodes/NodeComponents';
+import LabeledEdge from './LabeledEdge';
+import ValidationPanel from './ValidationPanel';
 import { NODE_REGISTRY, NODE_ICONS } from '../nodes/NodeRegistry';
 import { validateWorkflow, serializeWorkflow, topologicalSort } from '../engine/SimulationEngine';
 import { simulateWorkflow } from '../../../services/api';
@@ -40,6 +43,10 @@ import {
   FlaskConical,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+// ─── Edge Types ────────────────────────────────────────────────────────────────
+
+const edgeTypes = { labeled: LabeledEdge };
 
 // ─── Top Bar ───────────────────────────────────────────────────────────────────
 
@@ -489,6 +496,7 @@ const CanvasInner: React.FC = () => {
     onNodesChange, onEdgesChange, onConnect,
     addNode, selectNode, saveHistory,
     isSimulating, setSimulationData, stopSimulation, updateNodeData,
+    validationErrors, validationWarnings, setValidationResult, clearValidation,
   } = useWorkflowStore();
 
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -536,9 +544,15 @@ const CanvasInner: React.FC = () => {
     const run = async () => {
       const validation = validateWorkflow(nodes, edges);
       if (!validation.valid) {
-        alert('Validation errors:\n' + validation.errors.join('\n'));
+        // Show errors inline on canvas, not alert()
+        setValidationResult(validation.errors, validation.warnings);
         stopSimulation();
         return;
+      }
+
+      // Also surface warnings even on valid workflows
+      if (validation.warnings.length > 0) {
+        setValidationResult([], validation.warnings);
       }
 
       const ordered = topologicalSort(nodes, edges);
@@ -570,8 +584,16 @@ const CanvasInner: React.FC = () => {
     return () => { active = false; };
   }, [isSimulating]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const hasValidationIssues = validationErrors.length > 0 || validationWarnings.length > 0;
+
   return (
     <div className="flex-1 relative" ref={wrapperRef}>
+      {/* Validation panel — inline, no alert() */}
+      <ValidationPanel
+        result={hasValidationIssues ? { valid: validationErrors.length === 0, errors: validationErrors, warnings: validationWarnings } : null}
+        onDismiss={clearValidation}
+      />
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -582,6 +604,7 @@ const CanvasInner: React.FC = () => {
         onDrop={onDrop}
         onDragOver={onDragOver}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         connectionMode={ConnectionMode.Loose}
         deleteKeyCode={['Backspace', 'Delete']}
         onNodeClick={(_, n) => selectNode(n.id)}
@@ -592,6 +615,12 @@ const CanvasInner: React.FC = () => {
         minZoom={0.2}
         maxZoom={2.5}
         proOptions={{ hideAttribution: true }}
+        defaultEdgeOptions={{
+          type: 'labeled',
+          animated: true,
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1', width: 18, height: 18 },
+          style: { stroke: '#6366f1', strokeWidth: 2 },
+        }}
       >
         <Background
           variant={BackgroundVariant.Dots}
@@ -619,7 +648,13 @@ const CanvasInner: React.FC = () => {
           <div className="mb-4 flex items-center gap-3 bg-slate-800/90 backdrop-blur border border-slate-700/60 rounded-full px-4 py-2 shadow-xl text-[11px] font-bold text-slate-400">
             <span className="text-indigo-400">{nodes.length} nodes</span>
             <div className="w-px h-3 bg-slate-700" />
-            <span className="text-purple-400">{edges.length} edges</span>
+            <span className="text-purple-400">{edges.length} connections</span>
+            {edges.length > 0 && (
+              <>
+                <div className="w-px h-3 bg-slate-700" />
+                <span className="text-slate-500 text-[10px]">click an arrow to name it</span>
+              </>
+            )}
           </div>
         </Panel>
       </ReactFlow>
