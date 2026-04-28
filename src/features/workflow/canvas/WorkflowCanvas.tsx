@@ -49,7 +49,6 @@ import {
   Calendar,
   Workflow,
   Sparkles,
-  Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -111,13 +110,10 @@ const TopBar: React.FC = () => {
     <header className="h-14 bg-slate-900 border-b border-slate-700/60 flex items-center justify-between px-5 z-10 shrink-0">
       {/* Brand */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-900/40">
-          <Zap size={16} className="text-white" />
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
+          <Sparkles size={16} className="text-white" />
         </div>
         <span className="text-lg font-black text-white tracking-tight">FlowState</span>
-        <span className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm shadow-amber-900/50">
-          PRO
-        </span>
       </div>
 
       {/* Navigation */}
@@ -162,20 +158,11 @@ const TopBar: React.FC = () => {
 
       {/* Actions */}
       <div className="flex items-center gap-2">
-        {/* Pro Multiplayer Stub */}
-        <div className="hidden lg:flex items-center mr-2 -space-x-2">
-           <div className="w-7 h-7 rounded-full bg-blue-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white z-20">JD</div>
-           <div className="w-7 h-7 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white z-10">AK</div>
-           <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-[10px] text-slate-400 z-0">
-             <Users size={12} />
-           </div>
-        </div>
-
         <button
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg hover:bg-amber-500/20 transition-colors"
-          title="AI Assistant"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-all hover:scale-105 group"
+          title="Ask Gemini"
         >
-          <Sparkles size={13} /> Generate
+          <Sparkles size={13} className="text-blue-400 group-hover:animate-pulse" /> Ask Gemini
         </button>
 
         <div className="w-px h-4 bg-slate-700 mx-1" />
