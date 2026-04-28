@@ -2,7 +2,7 @@ import type { Node, Edge } from 'reactflow';
 
 // ─── Node Types ────────────────────────────────────────────────────────────────
 
-export type NodeKind = 'start' | 'task' | 'approval' | 'automation' | 'end';
+export type NodeKind = 'start' | 'webhook' | 'task' | 'approval' | 'automation' | 'switch' | 'end';
 
 export type NodeStatus = 'idle' | 'executing' | 'success' | 'warning' | 'error';
 

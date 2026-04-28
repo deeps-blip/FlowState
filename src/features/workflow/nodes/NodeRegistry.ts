@@ -1,10 +1,12 @@
-import type { NodeConfig, NodeKind } from '../types';
+import type { NodeConfig, NodeKind } from '../../../types';
 import {
   CirclePlay,
   User,
   Settings,
   Zap,
+  Split,
   XCircle,
+  Webhook,
 } from 'lucide-react';
 
 // ─── Node Registry ─────────────────────────────────────────────────────────────
@@ -25,6 +27,24 @@ export const NODE_REGISTRY: Record<NodeKind, NodeConfig> = {
     },
     fields: [
       { key: 'event', label: 'Trigger Event', type: 'text', placeholder: 'e.g. employee.hired' },
+    ],
+  },
+
+  webhook: {
+    kind: 'webhook',
+    label: 'Webhook Trigger',
+    description: 'Trigger from external app (Pro)',
+    color: 'border-l-cyan-500',
+    accentColor: 'text-cyan-500',
+    defaultData: {
+      title: 'Webhook',
+      description: 'Listens for POST requests',
+      type: 'webhook',
+      config: { endpointUrl: '/api/hooks/...', authSecret: '' },
+    },
+    fields: [
+      { key: 'endpointUrl', label: 'Endpoint URL', type: 'text', placeholder: '/api/hooks/xyz' },
+      { key: 'authSecret', label: 'Auth Secret', type: 'text', placeholder: 'Secret token' },
     ],
   },
 
@@ -123,6 +143,33 @@ export const NODE_REGISTRY: Record<NodeKind, NodeConfig> = {
     ],
   },
 
+  switch: {
+    kind: 'switch',
+    label: 'Condition (Switch)',
+    description: 'Routes execution based on rules (Pro)',
+    color: 'border-l-pink-500',
+    accentColor: 'text-pink-500',
+    defaultData: {
+      title: 'Condition Gate',
+      description: 'If / Else branching',
+      type: 'switch',
+      config: { conditionVariable: '', defaultPath: 'continue' },
+    },
+    fields: [
+      { key: 'conditionVariable', label: 'Evaluate Variable', type: 'text', placeholder: 'e.g. employee.department' },
+      { key: 'rules', label: 'Routing Rules', type: 'kv' },
+      {
+        key: 'defaultPath',
+        label: 'Default Path',
+        type: 'select',
+        options: [
+          { value: 'continue', label: 'Continue' },
+          { value: 'stop', label: 'Stop Workflow' },
+        ],
+      },
+    ],
+  },
+
   end: {
     kind: 'end',
     label: 'End Node',
@@ -152,8 +199,10 @@ export const NODE_REGISTRY: Record<NodeKind, NodeConfig> = {
 
 export const NODE_ICONS: Record<NodeKind, React.ComponentType<{ size?: number; className?: string }>> = {
   start: CirclePlay,
+  webhook: Webhook,
   task: User,
   approval: Settings,
   automation: Zap,
+  switch: Split,
   end: XCircle,
 };

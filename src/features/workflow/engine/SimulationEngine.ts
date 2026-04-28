@@ -3,7 +3,7 @@ import type {
   WorkflowEdge,
   SimulationLogEntry,
   WorkflowDefinition,
-} from '../types';
+} from '../../../types';
 
 // ─── Cycle Detection (DFS) ─────────────────────────────────────────────────────
 
