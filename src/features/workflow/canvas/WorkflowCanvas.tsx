@@ -25,6 +25,7 @@ import { appendExecLog } from '../../../db';
 import { DynamicForm } from '../forms/DynamicForm';
 import { useSchedulerStore } from '../../scheduler/SchedulerStore';
 import { SchedulerPanel } from '../../scheduler/SchedulerPanel';
+import { AiGenerationModal } from './AiGenerationModal';
 import { cn } from '../../../utils/cn';
 import type { NodeKind, WorkflowNode } from '../../../types';
 
@@ -58,7 +59,11 @@ const edgeTypes = { labeled: LabeledEdge };
 
 // ─── Top Bar ───────────────────────────────────────────────────────────────────
 
-const TopBar: React.FC = () => {
+interface TopBarProps {
+  onOpenAiModal: () => void;
+}
+
+const TopBar: React.FC<TopBarProps> = ({ onOpenAiModal }) => {
   const { nodes, edges, undo, redo, startSimulation, importWorkflow, setNodes, historyIndex, history } =
     useWorkflowStore();
   const { openPanel: openScheduler } = useSchedulerStore();
@@ -159,6 +164,7 @@ const TopBar: React.FC = () => {
       {/* Actions */}
       <div className="flex items-center gap-2">
         <button
+          onClick={onOpenAiModal}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-all hover:scale-105 group"
           title="Ask Gemini"
         >
@@ -718,10 +724,12 @@ const CanvasInner: React.FC = () => {
 // ─── WorkflowCanvas (exported) ─────────────────────────────────────────────────
 
 const WorkflowCanvas: React.FC = () => {
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
   return (
     <ReactFlowProvider>
       <div className="flex flex-col h-screen bg-slate-950 font-sans antialiased">
-        <TopBar />
+        <TopBar onOpenAiModal={() => setIsAiModalOpen(true)} />
         <div className="flex flex-1 min-h-0 relative">
           <NodePalette />
           <CanvasInner />
@@ -733,6 +741,11 @@ const WorkflowCanvas: React.FC = () => {
           </div>
         </div>
         <StatusBar />
+
+        <AiGenerationModal
+          isOpen={isAiModalOpen}
+          onClose={() => setIsAiModalOpen(false)}
+        />
       </div>
     </ReactFlowProvider>
   );
